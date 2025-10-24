@@ -15,7 +15,7 @@ It allows users to browse, search, and view movie details in a clean UI.
 
 ## 🛠️ Tech Stack
 - **Frontend**: HTML, CSS, JavaScript  
-- **API**: (Optional – e.g., [OMDb API](https://www.omdbapi.com/) or [TheMovieDB](https://www.themoviedb.org/))  
+- **API**: [TheMovieDB](https://www.themoviedb.org/)
 - **Version Control**: Git & GitHub  
 
 ---
