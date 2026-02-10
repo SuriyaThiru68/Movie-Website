@@ -48,13 +48,16 @@ function App() {
   }, []);
 
   const shuffleArray = (array) => {
-    return array.sort(() => Math.random() - 0.5);
+    if (!array) return [];
+    return [...array].sort(() => Math.random() - 0.5);
   };
 
   const loadRandomCarousel = async () => {
     try {
+      if (!API_KEY) throw new Error("TMDB API Key is missing");
       const response = await fetch(TMDB_DISCOVER_URL);
       const data = await response.json();
+      if (!data.results) throw new Error("No results found in API response");
       const movies = shuffleArray(data.results).slice(0, 20);
       setCarouselItems(movies);
     } catch (error) {
@@ -64,9 +67,12 @@ function App() {
 
   const loadTopRatedMovies = async () => {
     try {
+      if (!API_KEY) return;
       const res = await fetch(TMDB_TOP_RATED_URL);
       const data = await res.json();
-      setTopRated(data.results.slice(0, 8));
+      if (data.results) {
+        setTopRated(data.results.slice(0, 8));
+      }
     } catch (err) {
       console.error('Error loading top-rated movies:', err);
     }
@@ -74,9 +80,12 @@ function App() {
 
   const loadNowPlayingMovies = async () => {
     try {
+      if (!API_KEY) return;
       const res = await fetch(TMDB_NOW_PLAYING_URL);
       const data = await res.json();
-      setNowPlaying(data.results.slice(0, 12));
+      if (data.results) {
+        setNowPlaying(data.results.slice(0, 12));
+      }
     } catch (err) {
       console.error('Error loading now playing movies:', err);
     }
@@ -84,25 +93,34 @@ function App() {
 
   const loadUpcomingMovies = async () => {
     try {
+      if (!API_KEY) return;
       const res = await fetch(TMDB_UPCOMING_URL);
       const data = await res.json();
-      setUpcoming(data.results.slice(0, 12));
-    } catch (err) { console.error(err); }
+      if (data.results) {
+        setUpcoming(data.results.slice(0, 12));
+      }
+    } catch (err) { console.error('Error loading upcoming movies:', err); }
   };
 
   const loadTrendingMovies = async () => {
     try {
+      if (!API_KEY) return;
       const res = await fetch(TMDB_TRENDING_URL);
       const data = await res.json();
-      setTrending(data.results.slice(0, 12));
-    } catch (err) { console.error(err); }
+      if (data.results) {
+        setTrending(data.results.slice(0, 12));
+      }
+    } catch (err) { console.error('Error loading trending movies:', err); }
   };
 
   const loadTVShows = async () => {
     try {
+      if (!API_KEY) return;
       const res = await fetch(TMDB_TVSHOWS_URL);
       const data = await res.json();
-      setTvShows(data.results.slice(0, 20));
+      if (data.results) {
+        setTvShows(data.results.slice(0, 20));
+      }
     } catch (err) {
       console.error('Error loading TV shows:', err);
     }
@@ -110,10 +128,11 @@ function App() {
 
   const loadGenres = async () => {
     try {
+      if (!API_KEY) return;
       const res = await fetch(TMDB_GENRES_URL);
       const data = await res.json();
       setGenres(data.genres || []);
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('Error loading genres:', e); }
   };
 
   const handleGenreClick = async (genreId) => {
@@ -124,11 +143,14 @@ function App() {
     }
     setSelectedGenre(genreId);
     try {
+      if (!API_KEY) return;
       const url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${genreId}`;
       const res = await fetch(url);
       const data = await res.json();
-      setNowPlaying(data.results);
-    } catch (e) { console.error(e); }
+      if (data.results) {
+        setNowPlaying(data.results);
+      }
+    } catch (e) { console.error('Error filtering by genre:', e); }
   };
 
   const searchMovies = async () => {
@@ -137,6 +159,7 @@ function App() {
       return;
     }
     try {
+      if (!API_KEY) return;
       const res = await fetch(TMDB_SEARCH_URL + encodeURIComponent(searchQuery));
       const data = await res.json();
       if (!data.results || data.results.length === 0) {
@@ -159,19 +182,21 @@ function App() {
 
   const openModal = async (movie, type = 'movie') => {
     try {
+      if (!API_KEY) return;
       const url = `https://api.themoviedb.org/3/${type}/${movie.id}?api_key=${API_KEY}&append_to_response=videos,credits`;
       const res = await fetch(url);
       const data = await res.json();
 
-      setSelectedMovie({ ...data, media_type: type });
+      if (data) {
+        setSelectedMovie({ ...data, media_type: type });
 
-      const trailer = data.videos?.results?.find(
-        vid => vid.site === "YouTube" && (vid.type === "Trailer" || vid.type === "Teaser")
-      );
-      setTrailerKey(trailer ? trailer.key : null);
-      setCast(data.credits?.cast?.slice(0, 5) || []);
-
-    } catch (e) { console.error(e); }
+        const trailer = data.videos?.results?.find(
+          vid => vid.site === "YouTube" && (vid.type === "Trailer" || vid.type === "Teaser")
+        );
+        setTrailerKey(trailer ? trailer.key : null);
+        setCast(data.credits?.cast?.slice(0, 5) || []);
+      }
+    } catch (e) { console.error('Error loading movie details:', e); }
   };
 
   const closeModal = () => {
