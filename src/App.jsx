@@ -38,6 +38,12 @@ function App() {
   }, [favorites]);
 
   useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults(null);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
     loadRandomCarousel();
     loadTopRatedMovies();
     loadNowPlayingMovies();
@@ -45,6 +51,18 @@ function App() {
     loadTrendingMovies();
     loadTVShows();
     loadGenres();
+
+    const handleScroll = () => {
+      const backToTop = document.getElementById('backToTop');
+      if (window.scrollY > 300) {
+        if (backToTop) backToTop.style.display = 'flex';
+      } else {
+        if (backToTop) backToTop.style.display = 'none';
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const shuffleArray = (array) => {
@@ -167,6 +185,11 @@ function App() {
       } else {
         setSearchResults(data.results.slice(0, 12));
       }
+      // Scroll to results
+      setTimeout(() => {
+        const section = document.getElementById('searchSection');
+        if (section) section.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     } catch (err) {
       console.error('Search error:', err);
       setSearchResults([]);
@@ -254,10 +277,26 @@ function App() {
   return (
     <>
       <header className="header">
-        <div className="logo">
+        <div className="logo" onClick={() => handleNavClick('home')}>
           <img src="/assets/images/PQ_Circular_Favicon.png" alt="logo" />
           <span className="logo-text">POPCORNIQ</span>
         </div>
+
+        <div className="nav-search-container">
+          <div className="nav-search-bar">
+            <input
+              type="text"
+              placeholder="Search movies..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyPress}
+            />
+            <button onClick={searchMovies}>
+              <i className="fa-solid fa-magnifying-glass"></i>
+            </button>
+          </div>
+        </div>
+
         <nav className="sidebar">
           <ul style={{ alignItems: 'center' }}>
             <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('home', 'MovieHighlights'); }}>HIGHLIGHTS</a></li>
@@ -280,29 +319,27 @@ function App() {
             </div>
           </div>
 
-          <a href="#top" id="backToTop" className="back-to-top">⬆</a>
+          <button
+            id="backToTop"
+            className="back-to-top"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            ⬆
+          </button>
 
-          {/* Search Bar Section */}
-          <section className="section2" id="searchSection">
-            <h1>Search Movies</h1>
-            <div className="nav-search">
-              <input
-                type="text"
-                id="searchInput"
-                placeholder="Search movies..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchKeyPress}
-              />
-              <button onClick={searchMovies}>Search</button>
-            </div>
-            <div id="searchResults" className="featured">
-              {searchResults && searchResults.length === 0 && <p>No movies found.</p>}
-              {searchResults && searchResults.length > 0 && (
-                searchResults.map(movie => <MovieCard key={movie.id} movie={movie} />)
-              )}
-            </div>
-          </section>
+          {searchResults && (
+            <section className="section2" id="searchSection">
+              <h1>Search Results</h1>
+              <div id="searchResults" className="featured">
+                {searchResults.length === 0 ? (
+                  <p>No movies found matching "{searchQuery}".</p>
+                ) : (
+                  searchResults.map(movie => <MovieCard key={movie.id} movie={movie} />)
+                )}
+              </div>
+              <hr style={{ margin: '2rem 0', opacity: 0.1 }} />
+            </section>
+          )}
 
           <div className="highlights" id="MovieHighlights">
             <div id="carouselRandom" className="carousel slide" data-bs-ride="carousel" data-bs-interval="2000">
