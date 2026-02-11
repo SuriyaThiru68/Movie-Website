@@ -390,7 +390,7 @@ function App() {
 
           <div className="section2 video-background-section" id="movies">
             <video autoPlay muted loop playsInline className="bg-video">
-              <source src="/assets/video/2759477-uhd_3840_2160_30fps.mp4" type="video/mp4" />
+              <source src="/assets/video/backgroundvideo.mp4" type="video/mp4" />
             </video>
 
             <div className="movie-content">
