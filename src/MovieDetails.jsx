@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { TMDB_IMAGE_URLS } from './constants/tmdb';
+import { TMDB_IMAGE_URLS, BASE_URL } from './constants/tmdb';
 import Footer from './components/Footer';
 
 function MovieDetails() {
@@ -40,7 +40,7 @@ function MovieDetails() {
 
   const loadMovieDetails = async () => {
     try {
-      const url = `http://localhost:5000/api/tmdb/${type}/${id}?append_to_response=videos,credits,images`;
+      const url = `${BASE_URL}/${type}/${id}?append_to_response=videos,credits,images`;
       const res = await fetch(url);
       const data = await res.json();
 

@@ -1,5 +1,8 @@
-// Use the Node.js Proxy server locally (production recommendation)
-const BASE_URL = 'http://localhost:5000/api/tmdb';
+// Use environment variables for the API URL, falling back to local proxy in development
+export const BASE_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api/tmdb` 
+  : (import.meta.env.DEV ? 'http://localhost:5000/api/tmdb' : '/api/tmdb');
+
 
 export const TMDB_ENDPOINTS = {
   DISCOVER: `${BASE_URL}/discover/movie?language=en-US&sort_by=popularity.desc`,

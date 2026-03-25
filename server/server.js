@@ -29,6 +29,7 @@ const setCacheData = (key, data) => {
 
 // Proxy route for TMDB
 app.get('/api/tmdb/*', async (req, res) => {
+
   const path = req.params[0];
   const queryParams = new URLSearchParams(req.query).toString();
   const cacheKey = `${path}?${queryParams}`;
@@ -55,8 +56,17 @@ app.get('/api/tmdb/*', async (req, res) => {
   }
 });
 
+// Serve frontend static files from 'dist' directory
+app.use(express.static(path.join(__dirname, '../dist')));
+
+
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'OK' }));
+
+// Handle SPA routing - serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Proxy server running on http://localhost:${PORT}`);

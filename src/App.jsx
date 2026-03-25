@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { TMDB_ENDPOINTS, TMDB_IMAGE_URLS, fetchTMDB } from './constants/tmdb';
+import { TMDB_ENDPOINTS, TMDB_IMAGE_URLS, fetchTMDB, BASE_URL } from './constants/tmdb';
 
 // Modular Components
 import Navbar from './components/Navbar';
@@ -107,7 +107,7 @@ function App() {
     }
     setSelectedGenre(genreId);
     try {
-      const url = `http://localhost:5000/api/tmdb/discover/movie?with_genres=${genreId}`;
+      const url = `${BASE_URL}/discover/movie?with_genres=${genreId}`;
       const data = await fetchTMDB(url);
       if (data.results) {
         setNowPlaying(data.results);
@@ -146,7 +146,7 @@ function App() {
 
   const openModal = async (movie, type = 'movie') => {
     try {
-      const url = `http://localhost:5000/api/tmdb/${type}/${movie.id}?append_to_response=videos,credits`;
+      const url = `${BASE_URL}/${type}/${movie.id}?append_to_response=videos,credits`;
       const data = await fetchTMDB(url);
 
       if (data) {
