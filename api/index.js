@@ -1,11 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 const TMDB_API_KEY = process.env.VITE_TMDB_KEY;
 
 app.use(cors());
@@ -28,23 +25,23 @@ const setCacheData = (key, data) => {
 };
 
 // Proxy route for TMDB
+// Note: Vercel uses /api as the root for functions
+// We want this to catch /api/tmdb/*
 app.get('/api/tmdb/*', async (req, res) => {
   const endpointPath = req.params[0];
   const queryParams = new URLSearchParams(req.query).toString();
   const cacheKey = `${endpointPath}?${queryParams}`;
 
-  console.log(`[Proxy Request] Endpoint: ${endpointPath}, Params: ${queryParams}`);
+  console.log(`[Vercel Function] Endpoint: ${endpointPath}, Params: ${queryParams}`);
 
   // Check Cache
   const cachedData = getCachedData(cacheKey);
   if (cachedData) {
-    console.log(`[Cache Hit] ${cacheKey}`);
     return res.json(cachedData);
   }
 
   try {
     const tmdbUrl = `https://api.themoviedb.org/3/${endpointPath}?api_key=${TMDB_API_KEY}&${queryParams}`;
-    console.log(`[TMDB Fetch] ${tmdbUrl}`);
     const response = await axios.get(tmdbUrl);
     
     // Set Cache
@@ -52,25 +49,12 @@ app.get('/api/tmdb/*', async (req, res) => {
     
     res.json(response.data);
   } catch (error) {
-    console.error(`[Proxy Error] ${error.message}`);
-    if (error.response) {
-       console.error(`[TMDB Response Error] Status: ${error.response.status}, Data:`, error.response.data);
-    }
+    console.error(`[Error] ${error.message}`);
     res.status(error.response?.status || 500).json({ error: error.message });
   }
 });
 
-// Serve frontend static files from 'dist' directory
-app.use(express.static(path.join(__dirname, '../dist')));
-
 // Health check
-app.get('/health', (req, res) => res.json({ status: 'OK' }));
+app.get('/api/health', (req, res) => res.json({ status: 'OK' }));
 
-// Handle SPA routing - serve index.html for all non-API routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
-});
+module.exports = app;

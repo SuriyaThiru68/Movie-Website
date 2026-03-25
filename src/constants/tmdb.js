@@ -1,7 +1,6 @@
-// Use environment variables for the API URL, falling back to local proxy in development
-export const BASE_URL = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api/tmdb` 
-  : (import.meta.env.DEV ? 'http://localhost:5000/api/tmdb' : '/api/tmdb');
+// Use a relative path for the API base URL (Vite proxies this in dev)
+export const BASE_URL = '/api/tmdb';
+
 
 
 export const TMDB_ENDPOINTS = {
